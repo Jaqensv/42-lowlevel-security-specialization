@@ -1,38 +1,73 @@
 use std::env;
 
-fn parse_arguments(option: &str) {
-  if option.starts_with("-r") {
-      option_r();
-    } else if option.starts_with("-r -l") {
-    if let Ok(n) = option[3].parse::<u32>() {
-      option_rl();
-    }
-  } else if option.starts_with("-p") {
-    option_p();
+// enum Value {
+//   Path(String),
+//   Depth(i32),
+// }
+
+struct Config {
+  recursive: bool,
+  path: String,
+  depth: u32,
+}
+
+fn init_config(args: &Vec<String>) -> Config {
+  let recursive_opt: bool;
+  if args[1].starts_with("-r") {
+    recursive_opt = true;
   } else {
-    eprintln!("Wrong params");
-    std::process::exit(1);
+    recursive_opt = false;
   }
+
+  let config = Config {
+      recursive: recursive_opt,
+      path: "test".to_string(),
+      depth: 3,
+  };
+  config
 }
 
-fn option_r() {
-  println!("It's -r");
-}
+// fn parse_arguments(args: &Vec<String>) {
 
-fn option_rl() {
-  println!("It's -r -l");
-}
+//   //TMP//
+//   let str_len = args.len();
+//   println!("str_len = {}", str_len);
+//   //
+//   if args[1].starts_with("-r") {
+//     println!("Option -r");
+//   }
 
-fn option_p() {
-  println!("It's -p");
-}
+// }
 
 fn main() {
   let args: Vec<String> = env::args().collect();
-  if args.len() != 3 {
-    eprintln!("Wrong number of params");
-    std::process::exit(1);
-  }
-  let option: &str = &args[1];
-  parse_arguments(&option);
+  let config = init_config(&args);
+
+  println!("Recursive is: {}", config.recursive);
+  println!("Path is: {}", config.path);
+  println!("Depth is: {}", config.depth);
+  //let args: &str = env::args().collect();
+  // parse_arguments(&args);
+  // if args.len() != 3 {
+  //   eprintln!("Wrong number of params");
+  //   std::process::exit(1);
+  // }
+  
+  // let option: Option<Value> = match args.get(2) {
+  //   Some(s) => {
+  //       if let Ok(n) = s.parse::<i32>() {
+  //           Some(Value::Depth(n))
+  //       } else {
+  //           Some(Value::Path(s.clone()))
+  //       }
+  //   }
+  //   None => None,
+  // };
+
+  // match option {
+  //   Some(Value::Depth(n)) => println!("C'est un entier : {}", n),
+  //   Some(Value::Path(p)) => println!("C'est une chaîne : {}", p),
+  //   None => println!("Pas de valeur"),
+  // }
+
 }
