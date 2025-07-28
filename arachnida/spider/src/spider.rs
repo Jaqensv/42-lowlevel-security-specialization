@@ -1,17 +1,22 @@
 use std::env;
-
-// enum Value {
-//   Path(String),
-//   Depth(i32),
-// }
+use once_cell::sync::Lazy;
+use std::sync::Mutex;
 
 struct Config {
-  recursive: bool,
-  path: String,
-  depth: u32,
+    recursive: bool,
+    path: String,
+    depth: u32,
 }
 
-fn init_config(args: &Vec<String>) -> Config {
+static CONFIG: Lazy<Mutex<Config>> = Lazy(|| {
+  Mutex::new(Config {
+    recursive: false,
+    path: String::from("/data"),
+    depth: 5,
+  })
+});
+
+fn init_config(args: &Vec<String>) {
   let recursive_opt: bool;
   if args[1].starts_with("-r") {
     recursive_opt = true;
@@ -19,12 +24,11 @@ fn init_config(args: &Vec<String>) -> Config {
     recursive_opt = false;
   }
 
-  let config = Config {
+  Config {
       recursive: recursive_opt,
       path: "test".to_string(),
       depth: 3,
   };
-  config
 }
 
 // fn parse_arguments(args: &Vec<String>) {
@@ -41,11 +45,11 @@ fn init_config(args: &Vec<String>) -> Config {
 
 fn main() {
   let args: Vec<String> = env::args().collect();
-  let config = init_config(&args);
+  init_config(&args);
 
-  println!("Recursive is: {}", config.recursive);
-  println!("Path is: {}", config.path);
-  println!("Depth is: {}", config.depth);
+  println!("Recursive is: {}", Config::recursive);
+  println!("Path is: {}", Config::path);
+  println!("Depth is: {}", Config::depth);
   //let args: &str = env::args().collect();
   // parse_arguments(&args);
   // if args.len() != 3 {
