@@ -1,0 +1,6 @@
+| Commande                                  | Résultat attendu                             |
+| ----------------------------------------- | -------------------------------------------- |
+| `./spider -r http://site.com`             | recursive = true, depth = 5, path = "./data" |
+| `./spider -r -l 3 http://site.com`        | recursive = true, depth = 3                  |
+| `./spider -p /tmp/images http://site.com` | path = "/tmp/images"                         |
+| `./spider -r -l 2 -p out http://site.com` | recursive = true, depth = 2, path = "out"    |

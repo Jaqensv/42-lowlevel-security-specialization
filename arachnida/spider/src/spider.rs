@@ -1,6 +1,7 @@
 use std::env;
 use once_cell::sync::Lazy;
 use std::sync::Mutex;
+use url::Url;
 
 struct Config {
     recursive: bool,
@@ -8,7 +9,7 @@ struct Config {
     depth: u32,
 }
 
-static CONFIG: Lazy<Mutex<Config>> = Lazy(|| {
+static CONFIG: Lazy<Mutex<Config>> = Lazy::new(|| {
   Mutex::new(Config {
     recursive: false,
     path: String::from("/data"),
@@ -16,62 +17,54 @@ static CONFIG: Lazy<Mutex<Config>> = Lazy(|| {
   })
 });
 
-fn init_config(args: &Vec<String>) {
-  let recursive_opt: bool;
-  if args[1].starts_with("-r") {
-    recursive_opt = true;
-  } else {
-    recursive_opt = false;
-  }
-
-  Config {
-      recursive: recursive_opt,
-      path: "test".to_string(),
-      depth: 3,
-  };
+fn display_parsing_error() {
+    eprintln!("Error: please use the spaced '| -r | -l [depth] | -p [path] |' options, followed by a valid url");
+    std::process::exit(1);
 }
 
-// fn parse_arguments(args: &Vec<String>) {
+fn check_url(url: String) {
+	if Url::parse(&url).is_ok() {
+		println!("The url format is conform");
+	} else {
+		eprintln!("Error: please enter a valid url");
+		std::process::exit(1);
+	}
+}
 
-//   //TMP//
-//   let str_len = args.len();
-//   println!("str_len = {}", str_len);
-//   //
-//   if args[1].starts_with("-r") {
-//     println!("Option -r");
-//   }
-
-// }
+fn parse_options(args: &Vec<String>) {
+  let mut config = CONFIG.lock().unwrap();
+  let mut i = 1;
+  if args.len() > 1 {
+    while i < args.len() {
+      if args[i].starts_with("-r") && args[i].len() == 2 {
+        config.recursive = true;
+      } else if args[i].starts_with("-l") && args[i].len() == 2 && args.get(i + 1).is_some() && args[i + 1].parse::<u32>().is_ok() {
+        config.depth = args[i + 1].parse::<u32>().unwrap();
+        i += 1;
+      } else if args[i].starts_with("-p") && args[i].len() == 2 && args.get(i + 1).is_some() && args[i + 1].starts_with("/") {
+        config.path = args[i + 1].clone();
+        i += 1;
+      } else if args[args.len() - 1].starts_with("http") {
+				check_url(args[args.len() - 1].clone());
+			} else {
+        display_parsing_error();
+      }
+      i += 1;
+    }
+  } else {
+		display_parsing_error();
+	}
+}
 
 fn main() {
   let args: Vec<String> = env::args().collect();
-  init_config(&args);
+  parse_options(&args);
 
-  println!("Recursive is: {}", Config::recursive);
-  println!("Path is: {}", Config::path);
-  println!("Depth is: {}", Config::depth);
-  //let args: &str = env::args().collect();
-  // parse_arguments(&args);
-  // if args.len() != 3 {
-  //   eprintln!("Wrong number of params");
-  //   std::process::exit(1);
-  // }
-  
-  // let option: Option<Value> = match args.get(2) {
-  //   Some(s) => {
-  //       if let Ok(n) = s.parse::<i32>() {
-  //           Some(Value::Depth(n))
-  //       } else {
-  //           Some(Value::Path(s.clone()))
-  //       }
-  //   }
-  //   None => None,
-  // };
+  let config = CONFIG.lock().unwrap();
 
-  // match option {
-  //   Some(Value::Depth(n)) => println!("C'est un entier : {}", n),
-  //   Some(Value::Path(p)) => println!("C'est une chaîne : {}", p),
-  //   None => println!("Pas de valeur"),
-  // }
+  println!("Recursive is: {}", config.recursive);
+  println!("Path is: {}", config.path);
+  println!("Depth is: {}", config.depth);
 
 }
+
