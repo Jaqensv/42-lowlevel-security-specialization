@@ -12,6 +12,7 @@ use config::Config;
 mod display;
 use display::display_parsing_error;
 use display::display_values;
+use scraper::Html;
 
 static CONFIG: Lazy<Mutex<Config>> = Lazy::new(|| {
   Mutex::new(Config {
@@ -62,9 +63,6 @@ fn parse_options(args: &Vec<String>) {
   } else {
 		display_parsing_error();
 	}
-  // if args[args.len() - 1].starts_with("http") {
-	//   check_url(args[args.len() - 1].clone());
-  // }
 }
 
 fn main() {
@@ -72,10 +70,11 @@ fn main() {
   parse_options(&args);
   display_values();
   create_directory();
-  //let client = reqwest::blocking::Client::new();
-  //let reponse = client.get(args[args.len() - 1].clone()).header("User-Agent", "Mozilla 5.0").send().expect("Error: request failed");
-	//let body = reponse.text().expect("Request error");
-	//println!("Url is: {}", body);
+  let client = reqwest::blocking::Client::new();
+  let reponse = client.get(args[args.len() - 1].clone()).header("User-Agent", "Mozilla 5.0").send().expect("Error: request failed");
+	let body = reponse.text().expect("Request error");
+  let document = Html::parse_document(&body);
+	println!("Url is: {:?}", document);
 
 }
 

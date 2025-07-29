@@ -7,3 +7,9 @@
 
 URL (via reqwest::get) → réponse HTTP → bytes → File::create() → io::copy() → fichier local
 
+| Tâche               | Crate recommandée           |
+| ------------------- | --------------------------- |
+| Requête HTTP        | `reqwest` (avec `blocking`) |
+| Analyse HTML        | `scraper`                   |
+| Gestion d’URL       | `url`                       |
+| Système de fichiers | `std::fs`                   |
