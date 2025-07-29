@@ -1,16 +1,17 @@
 use std::env;
-use once_cell::sync::Lazy;
+use once_cell::sync::Lazy; // initialise la config a la premiere utilisation
 use std::sync::Mutex;
 use url::Url;
-use reqwest::blocking::get;
-// use std::fs::File;
+//use reqwest::blocking::get;
+//use std::fs::File;
+use std::fs; // creation de dossier
 // use std::io::copy;
-
-struct Config {
-    recursive: bool,
-    path: String,
-    depth: u32,
-}
+///
+mod config;
+use config::Config;
+mod display;
+use display::display_parsing_error;
+use display::display_values;
 
 static CONFIG: Lazy<Mutex<Config>> = Lazy::new(|| {
   Mutex::new(Config {
@@ -20,11 +21,6 @@ static CONFIG: Lazy<Mutex<Config>> = Lazy::new(|| {
   })
 });
 
-fn display_parsing_error() {
-    eprintln!("Error: please use the spaced '| -r | -l [depth] | -p [path] |' options, followed by a valid url");
-    std::process::exit(1);
-}
-
 fn check_url(url: String) {
 	if Url::parse(&url).is_ok() {
 		println!("The url format is conform");
@@ -32,6 +28,13 @@ fn check_url(url: String) {
 		eprintln!("Error: please enter a valid url");
 		std::process::exit(1);
 	}
+}
+
+fn create_directory() {
+  let config = CONFIG.lock().unwrap();
+  if let Err(error) = fs::create_dir(config.path.clone()) {
+    eprintln!("Error: failed to create the directory. Reason: {}", error);
+  }
 }
 
 fn parse_options(args: &Vec<String>) {
@@ -63,12 +66,12 @@ fn parse_options(args: &Vec<String>) {
 fn main() {
   let args: Vec<String> = env::args().collect();
   parse_options(&args);
-  let config = CONFIG.lock().unwrap();
-	let reponse = get(args[args.len() - 1].as_str()).expect("Request error");
-	let body = reponse.text().expect("Request error");
-  println!("Recursive is: {}", config.recursive);
-  println!("Path is: {}", config.path);
-  println!("Depth is: {}", config.depth);
-	println!("Url is: {}", body);
+  display_values();
+  create_directory();
+  //let client = reqwest::blocking::Client::new();
+  //let reponse = client.get(args[args.len() - 1].clone()).header("User-Agent", "Mozilla 5.0").send().expect("Error: request failed");
+	//let body = reponse.text().expect("Request error");
+	//println!("Url is: {}", body);
+
 }
 
