@@ -47,13 +47,14 @@ fn parse_options(args: &Vec<String>) {
       } else if args[i].starts_with("-l") && args[i].len() == 2 && args.get(i + 1).is_some() && args[i + 1].parse::<u32>().is_ok() {
         config.depth = args[i + 1].parse::<u32>().unwrap();
         i += 1;
-      } else if args[i].starts_with("-p") && args[i].len() == 2 && args.get(i + 1).is_some() && args[i + 1].starts_with("./") {
-        config.path = args[i + 1].clone();
+      } else if args[i].starts_with("-p") && args[i].len() == 2 {
+        if args[i + 1].starts_with("./") {
+          config.path = args[i + 1].clone();
+        }
         i += 1;
-      } else if args[args.len() - 1].starts_with("http") {
-				check_url(args[args.len() - 1].clone());
-				i += 1;
-			} else {
+      } else if args[i].starts_with("http") && i == (args.len() - 1) {
+	      check_url(args[i].clone());
+      } else {
         display_parsing_error();
       }
       i += 1;
@@ -61,6 +62,9 @@ fn parse_options(args: &Vec<String>) {
   } else {
 		display_parsing_error();
 	}
+  // if args[args.len() - 1].starts_with("http") {
+	//   check_url(args[args.len() - 1].clone());
+  // }
 }
 
 fn main() {
