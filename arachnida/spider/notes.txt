@@ -13,3 +13,62 @@ URL (via reqwest::get) → réponse HTTP → bytes → File::create() → io::co
 | Analyse HTML        | `scraper`                   |
 | Gestion d’URL       | `url`                       |
 | Système de fichiers | `std::fs`                   |
+
+------------------------------------------------------------------------------------------
+RUST notes:
+------------------------------------------------------------------------------------------
+Option<T> — représenter une valeur qui peut être absente
+Result<T, E> — représenter une opération qui peut échouer
+expect() — déballer un Option ou Result en panicant si erreur
+
+Alternatives à expect()
+| Méthode                 | Comporte quoi ?                         |
+| ----------------------- | --------------------------------------- |
+| `.unwrap()`             | Comme `expect`, sans message            |
+| `.unwrap_or(x)`         | Renvoie une valeur par défaut           |
+| `.is_some()`            | Teste si une `Option` a une valeur      |
+| `.map()`, `.and_then()` | Transforme le contenu si `Some` ou `Ok` |
+
+Resume
+| Type          | Utilité                                  | Exemple                      |
+| ------------- | ---------------------------------------- | ---------------------------- |
+| `Option<T>`   | Valeur présente ou non (`Some` / `None`) | `let val = opt.expect(...)`  |
+| `Result<T,E>` | Succès ou erreur (`Ok` / `Err`)          | `let val = res.expect(...)`  |
+| `.expect()`   | Prend la valeur ou **panic** si absente  | `expect("message d'erreur")` |
+
+Les 3 formes de self en Rust (ownership)
+| Syntaxe dans l’impl    | Type de `self`        | Comportement                                 |
+| ---------------------- | --------------------- | -------------------------------------------- |
+| `fn method(self)`      | **self est consommé** | L'objet est pris par **valeur** (ownership)  |
+| `fn method(&self)`     | **emprunt immuable**  | L'objet est prêté (read-only)                |
+| `fn method(&mut self)` | **emprunt mutable**   | L'objet est prêté avec droit de modification |
+
+Consommer self = prendre la possession complète de la valeur, et rendre inutilisable l'original après.
+
+| Forme Rust             | Traduction logique                      |
+| ---------------------- | --------------------------------------- |
+| `if let Some(x) = opt` | S’il y a **une valeur**, l’extraire     |
+| `if let Ok(x) = res`   | Si l’opération a **réussi**, l’extraire |
+| `if let Err(e) = res`  | Si l’opération a **échoué**, l’attraper |
+
+| Type          | Variante    | Signifie quoi ?                  | À utiliser quand...                       | Exemple d’utilisation                |
+| ------------- | ----------- | -------------------------------- | ----------------------------------------- | ------------------------------------ |
+| `Option<T>`   | `Some(val)` | ✅ Il y a une **valeur présente** | Une valeur **peut être absente**          | `element.value().attr("src")`        |
+| `Option<T>`   | `None`      | ❌ Il **n’y a pas** de valeur     |                                           | `None` si l’attribut n’existe pas    |
+| `Result<T,E>` | `Ok(val)`   | ✅ L’opération a **réussi**       | Une opération peut **réussir ou échouer** | `Url::parse(...)`, `fichier.read()`  |
+| `Result<T,E>` | `Err(err)`  | ❌ L’opération a **échoué**       |                                           | `Err("not a URL")`, `Err(io::Error)` |
+
+| Mot-clé | Vérifie quoi ?                           | Peut contenir quoi ?             | Typique de...        |
+| ------- | ---------------------------------------- | -------------------------------- | -------------------- |
+| `Some`  | Si une **valeur existe** (`Option`)      | La valeur disponible (`T`)       | Accès à une donnée   |
+| `None`  | Si la valeur **manque** (`Option`)       | —                                | Valeur absente       |
+| `Ok`    | Si une **opération a réussi** (`Result`) | Le résultat de l’opération (`T`) | Opérations fallibles |
+| `Err`   | Si une **opération a échoué** (`Result`) | L’erreur rencontrée (`E`)        | Gestion d’erreur     |
+
+📦 reqwest → pour faire une requête HTTP GET
+
+📦 std::fs::File → pour créer un fichier local
+
+📦 std::io::copy → pour écrire les octets dans le fichier
+
+✅ Optionnel : Path ou Url::path_segments() → pour obtenir un nom de fichier propre
