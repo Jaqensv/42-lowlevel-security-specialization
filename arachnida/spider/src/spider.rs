@@ -82,7 +82,7 @@ fn main() {
 				let mut reponse = client.get(full_url.clone()).send().expect("Error: request failed");
 				if let Some(filename) = full_url.path_segments().and_then(|segments| segments.last()) {
 						let filename = filename.to_lowercase();
-						if valid_exts.iter().any(|ext| filename.to_lowercase().ends_with(ext)) {
+						if valid_exts.iter().any(|ext| filename.ends_with(ext)) {
 							let path = format!("{}{}", config.path, filename);
 							let mut file = File::create(path).expect("Error: file creation failed");
 							reponse.copy_to(&mut file).expect("Error: copy failed");
