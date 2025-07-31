@@ -66,9 +66,6 @@ Consommer self = prendre la possession complète de la valeur, et rendre inutili
 | `Err`   | Si une **opération a échoué** (`Result`) | L’erreur rencontrée (`E`)        | Gestion d’erreur     |
 
 📦 reqwest → pour faire une requête HTTP GET
-
 📦 std::fs::File → pour créer un fichier local
-
 📦 std::io::copy → pour écrire les octets dans le fichier
-
 ✅ Optionnel : Path ou Url::path_segments() → pour obtenir un nom de fichier propre
