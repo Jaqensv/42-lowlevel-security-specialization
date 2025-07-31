@@ -2,10 +2,8 @@ use std::env;
 use once_cell::sync::Lazy; // initialise la config a la premiere utilisation
 use std::sync::Mutex;
 use url::Url;
-//use reqwest::blocking::get;
-//use std::fs::File;
 use std::fs; // creation de dossier
-// use std::io::copy;
+use std::fs::File;
 ///
 mod config;
 use config::Config;
@@ -33,7 +31,7 @@ fn check_url(url: String) {
 
 fn create_directory() {
 	let config = CONFIG.lock().unwrap();
-	if let Err(error) = fs::create_dir(config.path.clone()) {
+	if let Err(error) = fs::create_dir_all(config.path.clone()) {
 		eprintln!("Error: failed to create the directory. Reason: {}", error);
 	}
 }
@@ -71,18 +69,22 @@ fn main() {
 	display_values();
 	create_directory();
 	let client = reqwest::blocking::Client::new();
-	let base_url = Url::parse(&args[args.len() - 1]);
-	//println!("Url is: {:?}", base_url);
+	let base_url = Url::parse(&args[args.len() - 1]).expect("Error: failed to create the full_url");
 	let reponse = client.get(args[args.len() - 1].clone()).header("User-Agent", "Mozilla 5.0").send().expect("Error: request failed");
 	let body = reponse.text().expect("Request error");
 	let document = Html::parse_document(&body);
 	let selector = Selector::parse("img").unwrap();
-	//println!("Url is: {:?}", selector);
-	//println!("Url is: {:?}", document);
 	for element in document.select(&selector) {
-		let src = element.value().attr("data-src").or_else(|| element.value().attr("src"));
-		let full_url = base_url.clone().expect("Error: failed to create the full_url").join(src.expect("Reason"));
-		println!("Full_url is: {:?}", full_url);
+		if let Some(src) = element.value().attr("data-src").or_else(|| element.value().attr("src")) {
+			if let Ok(full_url) = base_url.join(src) {
+				let mut reponse = client.get(full_url.clone()).send().expect("Error: request failed");
+				if let Some(filename) = full_url.path_segments().and_then(|segments| segments.last()) {
+					let path = format!("./data/{}", filename);
+					let mut file = File::create(path).expect("Error: file creation failed");
+					reponse.copy_to(&mut file).expect("Error: copy failed");
+				}
+			}
+		}
 	}
 }
 
