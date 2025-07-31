@@ -65,9 +65,11 @@ fn parse_options(args: &Vec<String>) {
 
 fn main() {
 	let args: Vec<String> = env::args().collect();
+	let valid_exts = ["jpg", "jpeg", "png", "gif", "bmp"];
 	parse_options(&args);
 	display_values();
 	create_directory();
+	let config = CONFIG.lock().unwrap();
 	let client = reqwest::blocking::Client::new();
 	let base_url = Url::parse(&args[args.len() - 1]).expect("Error: failed to create the full_url");
 	let reponse = client.get(args[args.len() - 1].clone()).header("User-Agent", "Mozilla 5.0").send().expect("Error: request failed");
@@ -79,12 +81,14 @@ fn main() {
 			if let Ok(full_url) = base_url.join(src) {
 				let mut reponse = client.get(full_url.clone()).send().expect("Error: request failed");
 				if let Some(filename) = full_url.path_segments().and_then(|segments| segments.last()) {
-					let path = format!("./data/{}", filename);
-					let mut file = File::create(path).expect("Error: file creation failed");
-					reponse.copy_to(&mut file).expect("Error: copy failed");
+						let filename = filename.to_lowercase();
+						if valid_exts.iter().any(|ext| filename.to_lowercase().ends_with(ext)) {
+							let path = format!("{}{}", config.path, filename);
+							let mut file = File::create(path).expect("Error: file creation failed");
+							reponse.copy_to(&mut file).expect("Error: copy failed");
+						}
+					}
 				}
 			}
 		}
-	}
 }
-
