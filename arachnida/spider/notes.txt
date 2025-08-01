@@ -69,3 +69,15 @@ Consommer self = prendre la possession complète de la valeur, et rendre inutili
 📦 std::fs::File → pour créer un fichier local
 📦 std::io::copy → pour écrire les octets dans le fichier
 ✅ Optionnel : Path ou Url::path_segments() → pour obtenir un nom de fichier propre
+
+src/
+├── main.rs               // uniquement le point d’entrée
+├── app/
+│   ├── mod.rs            // pub mod config; mod args; mod init; mod scraper;
+│   ├── args.rs           // gestion des arguments CLI (Command Line Interface)
+│   ├── config.rs         // struct Config, lecture/mutation éventuelle
+│   ├── init.rs           // check_url, create_directory
+│   └── scraper.rs        // toute la logique de scraping
+├── ui/
+│   ├── mod.rs            // pub mod display;
+│   └── display.rs        // messages d’erreur ou d’info
