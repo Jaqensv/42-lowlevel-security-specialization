@@ -3,7 +3,7 @@ use scraper::{Html, Selector};
 use std::fs::File;
 use url::Url;
 
-pub fn scraper(args: &Vec<String>) {
+pub fn scraper(args: &[String]) {
     let valid_exts = ["jpg", "jpeg", "png", "gif", "bmp"];
     let config = CONFIG.lock().unwrap();
     let client = reqwest::blocking::Client::new();
