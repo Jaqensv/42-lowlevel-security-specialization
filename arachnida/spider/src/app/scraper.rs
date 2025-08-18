@@ -16,6 +16,7 @@ fn download_html(args: &[String], client: &reqwest::blocking::Client) -> Html {
     let body = reponse.text().expect("Error: request failed");
     Html::parse_document(&body)
 }
+
 fn parse_urls(document: &Html, url_selector: &Selector) {
     for element in document.select(&url_selector) {
         if let Some(href) = element.value().attr("href") {
@@ -31,9 +32,9 @@ pub fn scraper(args: &Vec<String>) {
     let base_url = extract_url(&args);
     let document = download_html(&args, &client);
     let img_selector = Selector::parse("img").unwrap();
-    let url_selector = Selector::parse("a[href]").unwrap();
+    //let url_selector = Selector::parse("a[href]").unwrap();
 
-    parse_urls(&document, &url_selector);
+    //parse_urls(&document, &url_selector);
 
     for element in document.select(&img_selector) {
         if let Some(src) = element
